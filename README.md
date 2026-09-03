@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CyberCafe Print
+
+Offline-first web application for cybercafés, photo studios, and print shops to quickly crop, layout, and print passport photos, visa photos, and ID cards.
+
+## MVP Workflow
+
+```
+Upload → Select Template → Crop → Auto Layout → Print Preview → Print
+```
+
+## Features (Phase 1 + 2 — Complete)
+
+- **Dashboard** with quick actions (Passport Photo, ID Card, A4 Sheet, Custom)
+- **Image upload** — drag & drop, file picker, clipboard paste (JPG/PNG/WEBP)
+- **Multi-image support** — crop multiple photos, assign different images to layout slots
+- **Advanced crop** — fixed ratio / free crop, zoom slider, per-image switcher, rotate/flip
+- **Manual layout editor** — drag, resize, duplicate, delete, align, distribute, snap-to-grid, canvas zoom
+- **Undo/redo** — layout, crop, and paper changes (Ctrl+Z / Ctrl+Shift+Z)
+- **Keyboard shortcuts** — Ctrl+O/S/P, R rotate, C crop, Delete, Esc
+- **Project save/load** — layout, processed images, and source blobs in IndexedDB
+- **Custom templates** — create, edit, delete with paper size, gaps, and copy count
+- **Print preview** — per-slot images, physical mm sizing, browser print stylesheet
+
+## Tech Stack
+
+- Next.js 16 · React 19 · TypeScript
+- Tailwind CSS 4
+- Zustand (state)
+- react-easy-crop (cropping)
+- IndexedDB via `idb`
+- Vitest (unit tests)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm test` | Run unit tests |
+| `npm run lint` | ESLint |
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/              # Pages: dashboard, editor, print, templates, settings
+├── components/       # UI, uploader, crop editor, layout canvas, print preview
+├── lib/
+│   ├── layout-engine/   # Pure layout calculation (columns, rows, positions)
+│   ├── image-processing/# Canvas crop/render pipeline
+│   ├── templates/       # Built-in templates & paper sizes
+│   ├── storage/         # IndexedDB persistence
+│   ├── utils/           # mm/px conversion utilities
+│   └── i18n/            # Translation keys
+└── store/            # Zustand stores (editor, settings, projects)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Print Instructions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+For accurate physical sizing, set your browser print dialog to:
 
-## Deploy on Vercel
+- **Scale:** 100%
+- **Margins:** None
+- **Headers & Footers:** Off
+- **Paper size:** Match the selected size in the app
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Privacy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All image processing happens locally in the browser. Photos are never uploaded to a server.
+
+## Tests
+
+Unit tests cover the layout engine and unit conversion utilities:
+
+```bash
+npm test
+```
+
+## Roadmap
+
+- **Phase 3:** Full project restore, batch processing, Hindi/Marathi UI, customer workflow
+- **Phase 4:** Optional AI modules (face detection, background removal)
