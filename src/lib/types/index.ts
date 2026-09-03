@@ -167,20 +167,30 @@ export interface AppSettings {
   printInstructions: string;
   printerName: string;
   nextJobNumber: number;
+  nextInvoiceNumber: number;
+  businessName: string;
+  businessAddress: string;
+  businessPhone: string;
+  taxRate: number;
+  dataRetentionDays: number;
 }
 
-export type JobStatus = "pending" | "processing" | "printed" | "completed" | "cancelled";
+export type JobStatus = "pending" | "processing" | "ready" | "printing" | "printed" | "completed" | "cancelled" | "failed";
 
 export interface PrintJob {
   id: string;
   jobNumber: number;
+  customerId?: string;
   customerName: string;
   serviceName: string;
   templateId: string;
   projectId?: string;
   copies: number;
+  pages: number;
   status: JobStatus;
+  printerProfileId?: string;
   notes?: string;
+  price?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -196,11 +206,108 @@ export interface InvoiceItem {
 export interface Invoice {
   id: string;
   invoiceNumber: string;
+  customerId?: string;
   customerName: string;
   items: InvoiceItem[];
   subtotal: number;
+  discount: number;
+  tax: number;
   total: number;
   paid: boolean;
+  paymentMethod?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// --- Customer Management ---
+
+export interface Customer {
+  id: string;
+  name: string;
+  mobile: string;
+  email?: string;
+  jobIds: string[];
+  totalSpent: number;
+  visitCount: number;
+  createdAt: string;
+  lastVisit: string;
+}
+
+// --- Printer Profile ---
+
+export interface PrinterProfile {
+  id: string;
+  name: string;
+  paperSizeId: string;
+  defaultDpi: number;
+  colorMode: "color" | "bw" | "grayscale";
+  margins: Margins;
+  scale: number;
+  orientation: PaperOrientation;
+  calibration?: CalibrationProfile;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface CalibrationProfile {
+  xOffset: number;
+  yOffset: number;
+  scaleX: number;
+  scaleY: number;
+}
+
+// --- Quick Presets ---
+
+export interface QuickPreset {
+  id: string;
+  name: string;
+  icon: string;
+  templateId: string;
+  paperId: string;
+  copies: number | "auto";
+  printerProfileId?: string;
+  isFavorite: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
+// --- Feature Flags ---
+
+export interface FeatureFlags {
+  faceDetection: boolean;
+  backgroundRemoval: boolean;
+  ocr: boolean;
+  qrUpload: boolean;
+  hotFolder: boolean;
+  cloudBackup: boolean;
+  customerManagement: boolean;
+  advancedBilling: boolean;
+  printerProfiles: boolean;
+  reports: boolean;
+}
+
+// --- Backup / Restore ---
+
+export interface BackupData {
+  version: string;
+  exportedAt: string;
+  templates: Template[];
+  settings: AppSettings;
+  customers: Customer[];
+  printerProfiles: PrinterProfile[];
+  presets: QuickPreset[];
+  jobs?: PrintJob[];
+  invoices?: Invoice[];
+}
+
+// --- Service Catalog for Billing ---
+
+export interface ServiceItem {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  price: number;
+  taxable: boolean;
+  active: boolean;
 }

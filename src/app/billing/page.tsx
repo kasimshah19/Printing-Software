@@ -61,6 +61,8 @@ export default function BillingPage() {
       customerName,
       items,
       subtotal,
+      discount: 0,
+      tax: 0,
       total: subtotal,
       paid: false,
       createdAt: new Date().toISOString(),

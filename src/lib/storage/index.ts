@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import type { AppSettings, EditorProject, PrintJob, Template } from "@/lib/types";
+import type { AppSettings, EditorProject, PrintJob, Template, Customer, PrinterProfile, Invoice, BackupData } from "@/lib/types";
 import { BUILT_IN_TEMPLATES } from "@/lib/templates/built-in";
 
 interface PrintShopDB extends DBSchema {
@@ -27,15 +27,24 @@ interface PrintShopDB extends DBSchema {
   };
   invoices: {
     key: string;
-    value: import("@/lib/types").Invoice;
+    value: Invoice;
     indexes: { "by-created": string };
+  };
+  customers: {
+    key: string;
+    value: Customer;
+    indexes: { "by-name": string; "by-mobile": string };
+  };
+  printerProfiles: {
+    key: string;
+    value: PrinterProfile;
   };
 }
 
 type JobStatus = PrintJob["status"];
 
 const DB_NAME = "cybercafe-print";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<PrintShopDB>> | null = null;
 
@@ -65,6 +74,14 @@ function getDB() {
           const invStore = db.createObjectStore("invoices", { keyPath: "id" });
           invStore.createIndex("by-created", "createdAt");
         }
+        if (!db.objectStoreNames.contains("customers")) {
+          const custStore = db.createObjectStore("customers", { keyPath: "id" });
+          custStore.createIndex("by-name", "name");
+          custStore.createIndex("by-mobile", "mobile");
+        }
+        if (!db.objectStoreNames.contains("printerProfiles")) {
+          db.createObjectStore("printerProfiles", { keyPath: "id" });
+        }
       },
     });
   }
@@ -84,6 +101,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   recentProjectCount: 10,
   printerName: "",
   nextJobNumber: 1001,
+  nextInvoiceNumber: 1,
+  businessName: "CyberCafe Print Studio",
+  businessAddress: "",
+  businessPhone: "",
+  taxRate: 0,
+  dataRetentionDays: 30,
   printInstructions:
     "Set Scale to 100%, Margins to None, disable Headers & Footers, and match the paper size shown.",
 };
@@ -239,4 +262,147 @@ export async function getTodayInvoiceStats(): Promise<{
     totalSales,
     invoicesCount: todayInvoices.length,
   };
+}
+
+// ─── Customer CRUD ─────────────────────────────────────
+
+export async function saveCustomer(customer: Customer): Promise<void> {
+  const db = await getDB();
+  await db.put("customers", customer);
+}
+
+export async function loadCustomer(id: string): Promise<Customer | undefined> {
+  const db = await getDB();
+  return db.get("customers", id);
+}
+
+export async function loadAllCustomers(): Promise<Customer[]> {
+  const db = await getDB();
+  return db.getAll("customers");
+}
+
+export async function deleteCustomer(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("customers", id);
+}
+
+export async function searchCustomers(query: string): Promise<Customer[]> {
+  const all = await loadAllCustomers();
+  const q = query.toLowerCase();
+  return all.filter(
+    (c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.mobile.includes(q) ||
+      (c.email && c.email.toLowerCase().includes(q))
+  );
+}
+
+// ─── Printer Profiles ──────────────────────────────────
+
+export async function savePrinterProfile(profile: PrinterProfile): Promise<void> {
+  const db = await getDB();
+  await db.put("printerProfiles", profile);
+}
+
+export async function loadAllPrinterProfiles(): Promise<PrinterProfile[]> {
+  const db = await getDB();
+  return db.getAll("printerProfiles");
+}
+
+export async function deletePrinterProfile(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete("printerProfiles", id);
+}
+
+// ─── Global Search ─────────────────────────────────────
+
+export async function globalSearch(query: string): Promise<{
+  customers: Customer[];
+  jobs: PrintJob[];
+  invoices: Invoice[];
+}> {
+  const q = query.toLowerCase();
+  const [allCustomers, allJobs, allInvoices] = await Promise.all([
+    loadAllCustomers(),
+    loadAllJobs(),
+    loadAllInvoices(),
+  ]);
+
+  return {
+    customers: allCustomers.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.mobile.includes(q)
+    ).slice(0, 10),
+    jobs: allJobs.filter(
+      (j) =>
+        j.customerName.toLowerCase().includes(q) ||
+        j.serviceName.toLowerCase().includes(q) ||
+        String(j.jobNumber).includes(q)
+    ).slice(0, 10),
+    invoices: allInvoices.filter(
+      (inv) =>
+        inv.customerName.toLowerCase().includes(q) ||
+        inv.invoiceNumber.includes(q)
+    ).slice(0, 10),
+  };
+}
+
+// ─── Backup / Restore ──────────────────────────────────
+
+export async function exportBackup(includeJobs = true): Promise<BackupData> {
+  const [templates, settings, customers, profiles, jobs, invoices] = await Promise.all([
+    loadUserTemplates(),
+    loadSettings(),
+    loadAllCustomers(),
+    loadAllPrinterProfiles(),
+    loadAllJobs(),
+    loadAllInvoices(),
+  ]);
+
+  return {
+    version: "1.0",
+    exportedAt: new Date().toISOString(),
+    templates,
+    settings,
+    customers,
+    printerProfiles: profiles,
+    presets: [],
+    jobs: includeJobs ? jobs : undefined,
+    invoices: includeJobs ? invoices : undefined,
+  };
+}
+
+export async function importBackup(data: BackupData): Promise<void> {
+  if (data.settings) await saveSettings(data.settings);
+  for (const t of data.templates ?? []) await saveUserTemplate(t);
+  for (const c of data.customers ?? []) await saveCustomer(c);
+  for (const p of data.printerProfiles ?? []) await savePrinterProfile(p);
+  for (const j of data.jobs ?? []) await saveJob(j);
+  for (const inv of data.invoices ?? []) await saveInvoice(inv);
+}
+
+// ─── Data Retention Cleanup ────────────────────────────
+
+export async function cleanupOldData(retentionDays: number): Promise<number> {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - retentionDays);
+  const cutoffStr = cutoff.toISOString();
+
+  let cleaned = 0;
+  const jobs = await loadAllJobs();
+  for (const job of jobs) {
+    if ((job.status === "completed" || job.status === "cancelled") && job.createdAt < cutoffStr) {
+      await deleteJob(job.id);
+      cleaned++;
+    }
+  }
+  return cleaned;
+}
+
+// ─── Allocate Invoice Number ───────────────────────────
+
+export async function allocateInvoiceNumber(): Promise<string> {
+  const settings = await loadSettings();
+  const num = settings.nextInvoiceNumber ?? 1;
+  await saveSettings({ ...settings, nextInvoiceNumber: num + 1 });
+  return `INV-${String(num).padStart(4, "0")}`;
 }

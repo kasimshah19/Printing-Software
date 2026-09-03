@@ -9,6 +9,8 @@ export type TranslationKey =
   | "nav.jobs"
   | "nav.billing"
   | "nav.fileTools"
+  | "nav.customers"
+  | "nav.reports"
   | "dashboard.quickActions"
   | "dashboard.passportPhoto"
   | "dashboard.idCard"
@@ -133,6 +135,8 @@ const en: Record<TranslationKey, string> = {
   "nav.jobs": "Jobs",
   "nav.billing": "Billing",
   "nav.fileTools": "File Tools",
+  "nav.customers": "Customers",
+  "nav.reports": "Reports",
   "dashboard.quickActions": "Quick Actions",
   "dashboard.passportPhoto": "Passport Photo",
   "dashboard.idCard": "ID Card",
@@ -258,6 +262,8 @@ const hi: Record<TranslationKey, string> = {
   "nav.jobs": "जॉब्स",
   "nav.billing": "बिलिंग",
   "nav.fileTools": "फाइल टूल्स",
+  "nav.customers": "ग्राहक",
+  "nav.reports": "रिपोर्ट",
   "dashboard.quickActions": "त्वरित कार्य",
   "dashboard.passportPhoto": "पासपोर्ट फोटो",
   "dashboard.idCard": "आईडी कार्ड",
@@ -383,6 +389,8 @@ const mr: Record<TranslationKey, string> = {
   "nav.jobs": "जॉब्ज",
   "nav.billing": "बिलिंग",
   "nav.fileTools": "फाईल टूल्स",
+  "nav.customers": "ग्राहक",
+  "nav.reports": "अहवाल",
   "dashboard.quickActions": "जलद कृती",
   "dashboard.passportPhoto": "पासपोर्ट फोटो",
   "dashboard.idCard": "आयडी कार्ड",
