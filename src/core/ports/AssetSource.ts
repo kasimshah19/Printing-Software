@@ -1,17 +1,27 @@
-import { AssetSourceType } from "../domain/JobAsset";
+import type { AssetSourceType } from "../domain/JobAsset";
 
 export interface AssetSourceCapabilities {
-    allowsMultiple: boolean;
-    maxFileSize: number;
+    supportsMultiple: boolean;
+    supportsProgress: boolean;
+    supportsCancellation: boolean;
     supportedMimeTypes: string[];
 }
 
-export interface AssetSource<ImportedAsset = any> {
+export interface ImportedAsset {
+    blob: Blob;
+    originalName: string;
+    sourceContext?: Record<string, any>;
+}
+
+export interface AssetSource {
     id: string;
     type: AssetSourceType;
 
     isAvailable(): Promise<boolean>;
     capabilities(): AssetSourceCapabilities;
+
+    // Abstract import workflow trigger
     import(): Promise<ImportedAsset[]>;
+
     cancel?(): Promise<void>;
 }
