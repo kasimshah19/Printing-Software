@@ -130,6 +130,81 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Printer configuration stub inside settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Printer Profiles (Active Setup)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label>Default Printer Model</Label>
+                <Input
+                  value={settings.printerName || ""}
+                  onChange={(e) => setSettings({ printerName: e.target.value })}
+                  placeholder="e.g. Epson L805 (Photo) / Canon G3010"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Default Print DPI</Label>
+                  <Input
+                    type="number"
+                    value={settings.defaultDpi || 300}
+                    onChange={(e) => setSettings({ defaultDpi: Number(e.target.value) || 300 })}
+                  />
+                  <p className="mt-1 text-xs text-slate-500">Usually 300 or 600.</p>
+                </div>
+                <div>
+                  <Label>Paper Size Preference</Label>
+                  <Select
+                    value={settings.defaultPaperId || "a4"}
+                    onChange={(e) => setSettings({ defaultPaperId: e.target.value })}
+                  >
+                    {PAPER_SIZES.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-slate-500 italic flex items-center justify-between">
+                <span>Calibration offset (X/Y scale) controls are hidden until Advanced Mode is checked.</span>
+                <span className="text-blue-500 hover:underline cursor-pointer">Manage Color Profiles</span>
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Advanced Feature Flags */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Experimental & Architecture Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Phone → PC QR Upload</h4>
+                  <p className="text-xs text-slate-500">Allow customers to send PDFs via local network scan.</p>
+                </div>
+                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Hot Folder Observer</h4>
+                  <p className="text-xs text-slate-500">Automatically ingest scans from native Desktop Agent.</p>
+                </div>
+                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900">Computer Vision OCR / Auto-Crop</h4>
+                  <p className="text-xs text-slate-500">Uses local Web Workers to extract names and face coordinates.</p>
+                </div>
+                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Printing */}
           <Card>
             <CardHeader>
