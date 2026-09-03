@@ -6,6 +6,7 @@ export const SUPPORTED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/webp",
+  "application/pdf",
 ];
 
 export const MAX_FILE_SIZE = 25 * 1024 * 1024;

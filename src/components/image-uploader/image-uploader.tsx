@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import { useEditorStore } from "@/store";
 import { validateImageFile } from "@/lib/image-processing";
+import { convertPdfToImages } from "@/lib/utils/pdf";
 import { formatFileSize } from "@/lib/utils/units";
 import { t } from "@/lib/i18n";
 import { useSettingsStore } from "@/store";
@@ -51,22 +52,36 @@ export function ImageUploader({
 
   const processFiles = useCallback(
     async (files: FileList | File[]) => {
-      for (const file of Array.from(files)) {
-        const error = validateImageFile(file);
-        if (error === "unsupported") {
-          alert(t("error.unsupportedImage", language));
-          continue;
+      for (let file of Array.from(files)) {
+        let filesToProcess: File[] = [file];
+
+        if (file.type === "application/pdf") {
+          try {
+            filesToProcess = await convertPdfToImages(file);
+          } catch (e) {
+            alert(t("error.generic", language));
+            continue;
+          }
         }
-        if (error === "tooLarge") {
-          alert(t("error.tooLarge", language));
-          continue;
-        }
-        try {
-          const image = await fileToUploadedImage(file);
-          addImage(image);
-          onFilesAdded?.();
-        } catch {
-          alert(t("error.generic", language));
+
+        for (const f of filesToProcess) {
+          const error = validateImageFile(f);
+          if (error === "unsupported") {
+            alert(t("error.unsupportedImage", language));
+            continue;
+          }
+          if (error === "tooLarge") {
+            alert(t("error.tooLarge", language));
+            continue;
+          }
+
+          try {
+            const image = await fileToUploadedImage(f);
+            addImage(image);
+            onFilesAdded?.();
+          } catch {
+            alert(t("error.generic", language));
+          }
         }
       }
     },
@@ -117,7 +132,7 @@ export function ImageUploader({
         <input
           ref={inputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
           multiple
           className="hidden"
           onChange={(e) => e.target.files && processFiles(e.target.files)}

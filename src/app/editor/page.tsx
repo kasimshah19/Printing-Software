@@ -115,7 +115,7 @@ function EditorContent() {
       <input
         ref={uploadInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
         multiple
         className="hidden"
         onChange={(e) => {
@@ -123,36 +123,50 @@ function EditorContent() {
           if (!files?.length) return;
           const process = async () => {
             const { validateImageFile } = await import("@/lib/image-processing");
+            const { convertPdfToImages } = await import("@/lib/utils/pdf");
             const { v4: uuidv4 } = await import("uuid");
             const addImage = useEditorStore.getState().addImage;
             const language = useSettingsStore.getState().settings.language;
-            for (const file of Array.from(files)) {
-              const error = validateImageFile(file);
-              if (error === "unsupported") {
-                alert(t("error.unsupportedImage", language));
-                continue;
+            
+            for (let file of Array.from(files)) {
+              let filesToProcess: File[] = [file];
+              if (file.type === "application/pdf") {
+                try {
+                  filesToProcess = await convertPdfToImages(file);
+                } catch (err) {
+                  alert(t("error.generic", language));
+                  continue;
+                }
               }
-              if (error === "tooLarge") {
-                alert(t("error.tooLarge", language));
-                continue;
+
+              for (const f of filesToProcess) {
+                const error = validateImageFile(f);
+                if (error === "unsupported") {
+                  alert(t("error.unsupportedImage", language));
+                  continue;
+                }
+                if (error === "tooLarge") {
+                  alert(t("error.tooLarge", language));
+                  continue;
+                }
+                const url = URL.createObjectURL(f);
+                const img = new Image();
+                await new Promise<void>((resolve, reject) => {
+                  img.onload = () => resolve();
+                  img.onerror = () => reject();
+                  img.src = url;
+                });
+                addImage({
+                  id: uuidv4(),
+                  filename: f.name,
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                  fileSize: f.size,
+                  mimeType: f.type,
+                  createdAt: new Date().toISOString(),
+                  objectUrl: url,
+                });
               }
-              const url = URL.createObjectURL(file);
-              const img = new Image();
-              await new Promise<void>((resolve, reject) => {
-                img.onload = () => resolve();
-                img.onerror = () => reject();
-                img.src = url;
-              });
-              addImage({
-                id: uuidv4(),
-                filename: file.name,
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-                fileSize: file.size,
-                mimeType: file.type,
-                createdAt: new Date().toISOString(),
-                objectUrl: url,
-              });
             }
             setActiveTab("crop");
           };
