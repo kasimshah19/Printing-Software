@@ -253,17 +253,26 @@ export default function DashboardPage() {
                             {job.serviceName} · {job.copies} copies
                           </p>
                         </div>
-                        <span
-                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                            job.status === "completed" || job.status === "printed"
-                              ? "bg-green-50 text-green-700"
-                              : job.status === "cancelled" || job.status === "failed"
-                              ? "bg-red-50 text-red-700"
-                              : "bg-orange-50 text-orange-700"
-                          }`}
-                        >
-                          {job.status}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                              job.status === "completed" || job.status === "printed"
+                                ? "bg-green-50 text-green-700"
+                                : job.status === "cancelled" || job.status === "failed"
+                                ? "bg-red-50 text-red-700"
+                                : "bg-orange-50 text-orange-700"
+                            }`}
+                          >
+                            {job.status}
+                          </span>
+                          <div className="flex -mr-1">
+                            <Link href={`/editor?template=${job.templateId}`}>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" title="Duplicate Job">
+                                <FileUp className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

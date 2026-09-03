@@ -167,7 +167,7 @@ export function ManualLayoutEditor({ scale: initialScale = 0.45, className = "" 
 
       <div className="overflow-auto rounded-lg bg-slate-100 p-4">
         <div
-          className="relative mx-auto bg-white shadow-lg select-none"
+          className="relative mx-auto bg-white shadow-[0_0_15px_rgba(0,0,0,0.1)] select-none"
           style={{
             width: `${paperWidthMm * scale}mm`,
             height: `${paperHeightMm * scale}mm`,
@@ -202,7 +202,7 @@ export function ManualLayoutEditor({ scale: initialScale = 0.45, className = "" 
               <div
                 key={item.id}
                 className={`absolute overflow-hidden border-2 bg-slate-50 ${
-                  isSelected ? "border-blue-500 ring-2 ring-blue-200" : "border-slate-300 hover:border-blue-300"
+                  isSelected ? "border-blue-500 ring-2 ring-blue-200 shadow-md z-10" : "border-slate-300 hover:border-blue-300"
                 }`}
                 style={{
                   left: `${item.x * scale}mm`,
@@ -229,7 +229,7 @@ export function ManualLayoutEditor({ scale: initialScale = 0.45, className = "" 
 
                 {isSelected && (
                   <>
-                    <div className="pointer-events-none absolute bottom-0 right-0 bg-blue-500 px-1 text-[7px] text-white">
+                    <div className="pointer-events-none absolute bottom-0 right-0 bg-blue-500 px-1 text-[7px] text-white backdrop-blur-sm">
                       {item.width.toFixed(0)}×{item.height.toFixed(0)}mm
                     </div>
                     <div
@@ -245,6 +245,28 @@ export function ManualLayoutEditor({ scale: initialScale = 0.45, className = "" 
           })}
         </div>
       </div>
+
+      {layoutItems.length > 0 && (
+        <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-white p-3 text-xs shadow-sm">
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="font-semibold text-slate-700">Copies:</span> {layoutItems.length}
+            </div>
+            <div>
+              <span className="font-semibold text-slate-700">Paper Utilization:</span>{" "}
+              {Math.round(
+                (layoutItems.reduce((area, item) => area + item.width * item.height, 0) /
+                  (paperWidthMm * paperHeightMm)) *
+                  100
+              )}
+              %
+            </div>
+          </div>
+          <div className="text-slate-500">
+            Recommended: Use <strong>Auto Layout</strong> to minimize paper waste.
+          </div>
+        </div>
+      )}
 
       {selectedLayoutItemId && (
         <div className="space-y-3 rounded-lg bg-slate-50 p-3 text-sm">
