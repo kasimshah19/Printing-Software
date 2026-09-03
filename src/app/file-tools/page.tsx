@@ -18,7 +18,10 @@ import {
   FileOutput,
 } from "lucide-react";
 
-type ActiveTool = "compressor" | "signature" | "validator" | "converter";
+import { PDFDocument } from "pdf-lib";
+import { convertPdfToImages } from "@/lib/utils/pdf";
+
+type ActiveTool = "compressor" | "signature" | "validator" | "converter" | "pdf-compressor";
 
 // ─── Image Compression Engine ──────────────────────────
 async function compressToTarget(
@@ -104,6 +107,7 @@ export default function FileToolsPage() {
     { key: "signature" as const, icon: FileSignature, label: t("tools.signature", language) },
     { key: "validator" as const, icon: FileCheck, label: "File Validator" },
     { key: "converter" as const, icon: FileOutput, label: "Format Converter" },
+    { key: "pdf-compressor" as const, icon: FileOutput, label: "PDF Compressor" },
   ];
 
   return (
@@ -132,6 +136,7 @@ export default function FileToolsPage() {
         {activeTool === "signature" && <SignatureTool />}
         {activeTool === "validator" && <ValidatorTool />}
         {activeTool === "converter" && <ConverterTool />}
+        {activeTool === "pdf-compressor" && <PdfCompressorTool />}
       </main>
     </div>
   );
@@ -590,3 +595,134 @@ function ConverterTool() {
     </div>
   );
 }
+// ─── PDF COMPRESSOR ─────────────────────────────────────
+function PdfCompressorTool() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [compressedPdfUrl, setCompressedPdfUrl] = useState("");
+  const [compressedSize, setCompressedSize] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [compressionLevel, setCompressionLevel] = useState<"low" | "medium" | "high">("medium");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOriginalFile(file);
+    setCompressedPdfUrl("");
+  };
+
+  const handleCompress = async () => {
+    if (!originalFile) return;
+    setIsProcessing(true);
+
+    try {
+      let scale = 1.0;
+      let quality = 0.5;
+      if (compressionLevel === "low") { scale = 2.0; quality = 0.8; }
+      else if (compressionLevel === "medium") { scale = 1.2; quality = 0.6; }
+      else { scale = 0.8; quality = 0.4; }
+
+      // 1. Extract to Images using our existing utility
+      const images = await convertPdfToImages(originalFile, { scale, quality });
+      
+      // 2. Rebuild PDF
+      const pdfDoc = await PDFDocument.create();
+      
+      for (const imgFile of images) {
+        const arrayBuffer = await imgFile.arrayBuffer();
+        const image = await pdfDoc.embedJpg(arrayBuffer);
+        const { width, height } = image;
+        
+        // Convert pixel dimensions to roughly A4 or matching points if we want,
+        // but simplest is just mapping directly to point coordinates.
+        // A standard A4 is 595 x 842 points.
+        // We'll scale the image to fit a standard A4 page or use its own aspect ratio.
+        const page = pdfDoc.addPage([width, height]);
+        page.drawImage(image, {
+          x: 0,
+          y: 0,
+          width,
+          height,
+        });
+      }
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      setCompressedPdfUrl(url);
+      setCompressedSize(blob.size);
+
+    } catch (err) {
+      alert("Error compressing PDF.");
+      console.error(err);
+    }
+    
+    setIsProcessing(false);
+  };
+
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <Card>
+        <CardHeader><CardTitle>PDF Compressor / Resizer</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <input type="file" accept="application/pdf" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+          <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="w-full gap-2">
+            <Upload className="h-4 w-4" /> Upload PDF Document
+          </Button>
+          
+          {originalFile && (
+            <div className="rounded-lg bg-slate-100 p-3 text-sm space-y-1">
+              <p className="truncate"><strong>File:</strong> {originalFile.name}</p>
+              <p><strong>Original Size:</strong> {(originalFile.size / 1024).toFixed(1)} KB</p>
+            </div>
+          )}
+
+          <div>
+            <Label>Compression Level</Label>
+            <Select value={compressionLevel} onChange={(e) => setCompressionLevel(e.target.value as any)}>
+              <option value="low">Low Compression (Better Quality)</option>
+              <option value="medium">Medium Compression (Recommended)</option>
+              <option value="high">High Compression (Smallest Size)</option>
+            </Select>
+          </div>
+
+          <Button onClick={handleCompress} disabled={!originalFile || isProcessing} className="w-full">
+            {isProcessing ? "Compressing PDF (Extracting pages...)" : "Compress PDF"}
+          </Button>
+
+          {compressedPdfUrl && (
+            <div className="space-y-3 rounded-xl border border-green-200 bg-green-50 p-4">
+              <div className="flex items-center gap-2 text-green-800 font-semibold">
+                <CheckCircle2 className="h-5 w-5" /> Successfully Compressed!
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm">
+                  <span className="text-green-700 font-medium">{(compressedSize / 1024).toFixed(1)} KB</span>
+                  {originalFile && (
+                    <span className="ml-2 text-slate-500">
+                      ({(((originalFile.size - compressedSize) / originalFile.size) * 100).toFixed(1)}% smaller)
+                    </span>
+                  )}
+                </div>
+                <a href={compressedPdfUrl} download={`compressed_${originalFile?.name}`}>
+                  <Button size="sm" className="gap-2"><Download className="h-4 w-4" /> Download PDF</Button>
+                </a>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Card className="bg-amber-50/50 self-start">
+        <CardContent className="p-6 space-y-3">
+          <h3 className="font-semibold text-amber-800">About PDF Compression</h3>
+          <ul className="text-sm text-amber-700 space-y-2 list-disc pl-4">
+            <li><strong>How it works:</strong> The PDF pages are flattened and re-encoded using high-efficiency JPEG compression directly in your browser.</li>
+            <li><strong>100% Private:</strong> Your documents are never uploaded to any server.</li>
+            <li><strong>Text Search:</strong> Note that compressing will flatten text into images, rendering it unselectable but significantly reducing file size for web uploads (like government portals).</li>
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
