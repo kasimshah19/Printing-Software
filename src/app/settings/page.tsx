@@ -10,7 +10,8 @@ import { clearAllData, exportBackup, importBackup, cleanupOldData } from "@/lib/
 import { t } from "@/lib/i18n";
 import { useSettingsStore } from "@/store";
 import type { Language } from "@/lib/i18n";
-import { Download, Upload, Trash2, Shield } from "lucide-react";
+import { Download, Upload, Trash2, Shield, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const settings = useSettingsStore((s) => s.settings);
@@ -175,33 +176,21 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Advanced Feature Flags */}
+          {/* Connectivity Center Link */}
           <Card>
             <CardHeader>
-              <CardTitle>Experimental & Architecture Features</CardTitle>
+              <CardTitle>Connectivity Integrations</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900">Phone → PC QR Upload</h4>
-                  <p className="text-xs text-slate-500">Allow customers to send PDFs via local network scan.</p>
-                </div>
-                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900">Hot Folder Observer</h4>
-                  <p className="text-xs text-slate-500">Automatically ingest scans from native Desktop Agent.</p>
-                </div>
-                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
-              </div>
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900">Computer Vision OCR / Auto-Crop</h4>
-                  <p className="text-xs text-slate-500">Uses local Web Workers to extract names and face coordinates.</p>
-                </div>
-                <span className="text-[10px] uppercase font-bold px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Coming Soon</span>
-              </div>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-600">
+                Manage Phone QR uploads, Hot Folder monitoring, Scanner integrations, and Cloud Backup settings.
+              </p>
+              <Link href="/connectivity" className="block w-full">
+                <Button variant="outline" className="w-full justify-between">
+                  Open Connectivity Center
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 

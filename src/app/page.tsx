@@ -46,14 +46,22 @@ const quickActions = [
   { id: "custom", label: "Custom Print", icon: Printer, href: "/editor", color: "bg-orange-50 text-orange-700 border-orange-200" },
 ];
 
-const importActions = [
+interface ActionType {
+  id: string;
+  label: string;
+  icon: any;
+  href: string;
+  comingSoon?: boolean;
+}
+
+const importActions: ActionType[] = [
   { id: "upload-image", label: "Upload Image", icon: Upload, href: "/editor" },
   { id: "upload-pdf", label: "Upload PDF", icon: FileUp, href: "/editor" },
   { id: "paste-image", label: "Paste Image", icon: ClipboardPaste, href: "/editor" },
   { id: "camera", label: "Camera", icon: Camera, href: "/editor" },
-  { id: "phone-qr", label: "Phone QR", icon: Smartphone, href: "#", comingSoon: true },
-  { id: "scanner", label: "Scanner", icon: ScanLine, href: "#", comingSoon: true },
-  { id: "hot-folder", label: "Hot Folder", icon: FolderDown, href: "#", comingSoon: true },
+  { id: "phone-qr", label: "Phone QR", icon: Smartphone, href: "/connectivity" },
+  { id: "scanner", label: "Scanner", icon: ScanLine, href: "/connectivity" },
+  { id: "hot-folder", label: "Hot Folder", icon: FolderDown, href: "/connectivity" },
 ];
 
 export default function DashboardPage() {
@@ -172,16 +180,16 @@ export default function DashboardPage() {
                 Import
               </h2>
               <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-                {importActions.map(({ id, icon: Icon, href, label, comingSoon }) => (
-                  <Link key={id} href={href} className={comingSoon ? "pointer-events-none opacity-60" : ""}>
+                {importActions.map((action) => (
+                  <Link key={action.id} href={action.href} className={("comingSoon" in action && action.comingSoon) ? "pointer-events-none opacity-60" : ""}>
                     <Card className="cursor-pointer border transition-all hover:border-slate-300 hover:bg-slate-50">
                       <CardContent className="flex items-center gap-3 p-3">
                         <div className="rounded-lg bg-slate-100 p-2 text-slate-600">
-                          <Icon className="h-4 w-4" />
+                          <action.icon className="h-4 w-4" />
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-slate-800">{label}</span>
-                          {comingSoon && <span className="text-[9px] font-bold text-orange-500 uppercase tracking-wider">Coming Soon</span>}
+                          <span className="text-sm font-medium text-slate-800">{action.label}</span>
+                          {("comingSoon" in action && action.comingSoon) && <span className="text-[9px] font-bold text-orange-500 uppercase tracking-wider">Coming Soon</span>}
                         </div>
                       </CardContent>
                     </Card>
