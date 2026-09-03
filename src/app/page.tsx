@@ -15,79 +15,50 @@ import {
   IndianRupee,
   TrendingUp,
   Layers,
+  Upload,
+  FileUp,
+  ClipboardPaste,
+  Smartphone,
+  ScanLine,
+  FolderDown,
+  Star
 } from "lucide-react";
 import { AppHeader } from "@/components/common/app-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useProjectStore, useSettingsStore } from "@/store";
+import { useSettingsStore } from "@/store";
 import { getTodayJobStats, getTodayInvoiceStats, loadAllJobs } from "@/lib/storage";
 import type { PrintJob } from "@/lib/types";
 import { t } from "@/lib/i18n";
+import { BUILT_IN_TEMPLATES } from "@/lib/templates/built-in";
 
 const quickActions = [
-  {
-    id: "passport-photo",
-    labelKey: "dashboard.passportPhoto" as const,
-    icon: Camera,
-    href: "/editor?template=passport-photo",
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-  },
-  {
-    id: "aadhaar",
-    labelKey: "dashboard.idCard" as const,
-    icon: CreditCard,
-    href: "/editor?template=aadhaar",
-    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  },
-  {
-    id: "passport-a4-35",
-    labelKey: "dashboard.a4Sheet" as const,
-    icon: FileImage,
-    href: "/editor?template=passport-a4-35",
-    color: "bg-violet-50 text-violet-700 border-violet-200",
-  },
-  {
-    id: "custom",
-    labelKey: "dashboard.customPrint" as const,
-    icon: Printer,
-    href: "/editor",
-    color: "bg-orange-50 text-orange-700 border-orange-200",
-  },
-  {
-    id: "compress",
-    label: "Compress Image",
-    icon: Scissors,
-    href: "/file-tools",
-    color: "bg-pink-50 text-pink-700 border-pink-200",
-  },
-  {
-    id: "signature",
-    label: "Signature",
-    icon: FileSignature,
-    href: "/file-tools",
-    color: "bg-amber-50 text-amber-700 border-amber-200",
-  },
-  {
-    id: "document",
-    label: "Document Scan",
-    icon: FileText,
-    href: "/editor",
-    color: "bg-teal-50 text-teal-700 border-teal-200",
-  },
-  {
-    id: "new-job",
-    label: "New Job",
-    icon: Layers,
-    href: "/jobs",
-    color: "bg-slate-100 text-slate-700 border-slate-200",
-  },
+  { id: "passport", label: "Passport Photo", icon: Camera, href: "/editor?template=passport-photo", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { id: "id-card", label: "Generic ID Card", icon: CreditCard, href: "/editor?template=generic-id", color: "bg-sky-50 text-sky-700 border-sky-200" },
+  { id: "aadhaar", label: "Aadhaar PVC", icon: CreditCard, href: "/editor?template=aadhaar-pvc", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { id: "pan", label: "PAN Card", icon: CreditCard, href: "/editor?template=pan-card", color: "bg-teal-50 text-teal-700 border-teal-200" },
+  { id: "dl", label: "Driving Licence", icon: CreditCard, href: "/editor?template=driving-licence", color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+  { id: "voter", label: "Voter ID", icon: CreditCard, href: "/editor?template=voter-epic-new", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  { id: "document", label: "A4 Document", icon: FileText, href: "/editor?template=aadhaar-letter", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  { id: "pdf", label: "PDF Tools", icon: FileUp, href: "/file-tools", color: "bg-pink-50 text-pink-700 border-pink-200" },
+  { id: "signature", label: "Signature", icon: FileSignature, href: "/file-tools", color: "bg-amber-50 text-amber-700 border-amber-200" },
+  { id: "compress", label: "Compress", icon: Scissors, href: "/file-tools", color: "bg-rose-50 text-rose-700 border-rose-200" },
+  { id: "custom", label: "Custom Print", icon: Printer, href: "/editor", color: "bg-orange-50 text-orange-700 border-orange-200" },
+];
+
+const importActions = [
+  { id: "upload-image", label: "Upload Image", icon: Upload, href: "/editor" },
+  { id: "upload-pdf", label: "Upload PDF", icon: FileUp, href: "/editor" },
+  { id: "paste-image", label: "Paste Image", icon: ClipboardPaste, href: "/editor" },
+  { id: "camera", label: "Camera", icon: Camera, href: "/editor" },
+  { id: "phone-qr", label: "Phone QR", icon: Smartphone, href: "#", comingSoon: true },
+  { id: "scanner", label: "Scanner", icon: ScanLine, href: "#", comingSoon: true },
+  { id: "hot-folder", label: "Hot Folder", icon: FolderDown, href: "#", comingSoon: true },
 ];
 
 export default function DashboardPage() {
   const language = useSettingsStore((s) => s.settings.language);
   const loadSettings = useSettingsStore((s) => s.loadFromStorage);
-  const recentProjects = useProjectStore((s) => s.recentProjects);
-  const loadRecent = useProjectStore((s) => s.loadRecent);
 
   const [jobStats, setJobStats] = useState({ total: 0, printed: 0, pending: 0 });
   const [invoiceStats, setInvoiceStats] = useState({ totalSales: 0, invoicesCount: 0 });
@@ -95,11 +66,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadSettings();
-    loadRecent();
     getTodayJobStats().then(setJobStats);
     getTodayInvoiceStats().then(setInvoiceStats);
     loadAllJobs().then((jobs) => setRecentJobs(jobs.slice(0, 5)));
-  }, [loadSettings, loadRecent]);
+  }, [loadSettings]);
+
+  // Favorites dummy logic (ideally saved in store/local storage)
+  const favorites = BUILT_IN_TEMPLATES.filter(t => ["aadhaar-pvc", "pan-card", "passport-photo", "driving-licence"].includes(t.id));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -109,11 +82,11 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold text-slate-900">
             {t("nav.dashboard", language)}
           </h1>
-          <p className="mt-1 text-slate-600">{t("app.tagline", language)}</p>
+          <p className="mt-1 text-slate-600">CyberCafe Document & Print Production Suite</p>
         </div>
 
-        {/* Today Stats */}
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 1. TODAY SUMMARY */}
+        <section className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
@@ -127,7 +100,6 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
@@ -141,7 +113,6 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
@@ -155,7 +126,6 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
-
           <Card>
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
@@ -167,124 +137,140 @@ export default function DashboardPage() {
                   <IndianRupee className="h-5 w-5 text-violet-600" />
                 </div>
               </div>
-              <p className="mt-2 text-xs text-slate-500 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" /> {invoiceStats.invoicesCount} invoices
-              </p>
             </CardContent>
           </Card>
         </section>
 
-        {/* Quick Jobs */}
-        <section className="mb-10">
-          <h2 className="mb-4 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-            Quick Jobs
-          </h2>
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
-            {quickActions.map(({ id, icon: Icon, href, color, ...rest }) => {
-              const label = "labelKey" in rest ? t(rest.labelKey as any, language) : (rest as any).label ?? id;
-              return (
-                <Link key={id} href={href}>
-                  <Card className={`cursor-pointer border transition-all hover:shadow-md hover:-translate-y-0.5 ${color}`}>
-                    <CardContent className="flex flex-col items-center gap-2 p-4">
-                      <div className="rounded-full bg-white/80 p-2.5">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <span className="text-center text-xs font-semibold leading-tight">
-                        {label}
-                      </span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
+        <div className="grid gap-8 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-10">
+            {/* 2. QUICK ACTIONS */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                Quick Actions
+              </h2>
+              <div className="grid gap-3 grid-cols-2 sm:grid-cols-4 lg:grid-cols-5">
+                {quickActions.map(({ id, icon: Icon, href, color, label }) => (
+                  <Link key={id} href={href}>
+                    <Card className={`cursor-pointer border transition-all hover:shadow-md hover:-translate-y-0.5 ${color} h-full`}>
+                      <CardContent className="flex flex-col items-center gap-2 p-3 text-center">
+                        <div className="rounded-full bg-white/80 p-2.5">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <span className="text-xs font-semibold leading-tight">
+                          {label}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </section>
+
+            {/* 3. IMPORT */}
+            <section>
+              <h2 className="mb-4 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                Import
+              </h2>
+              <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                {importActions.map(({ id, icon: Icon, href, label, comingSoon }) => (
+                  <Link key={id} href={href} className={comingSoon ? "pointer-events-none opacity-60" : ""}>
+                    <Card className="cursor-pointer border transition-all hover:border-slate-300 hover:bg-slate-50">
+                      <CardContent className="flex items-center gap-3 p-3">
+                        <div className="rounded-lg bg-slate-100 p-2 text-slate-600">
+                          <Icon className="h-4 w-4" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-slate-800">{label}</span>
+                          {comingSoon && <span className="text-[9px] font-bold text-orange-500 uppercase tracking-wider">Coming Soon</span>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </section>
           </div>
-        </section>
 
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Recent Jobs */}
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                Active Jobs
-              </h2>
-              <Link href="/jobs" className="text-xs font-medium text-blue-600 hover:underline">
-                View All →
-              </Link>
-            </div>
-            {recentJobs.length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center text-slate-500">
-                  {t("jobs.noJobs", language)}
-                </CardContent>
-              </Card>
-            ) : (
+          <div className="lg:col-span-4 space-y-10">
+            {/* 4. FAVORITE PRESETS */}
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  <Star className="h-4 w-4" /> Favorite Presets
+                </h2>
+                <Link href="/templates" className="text-xs font-medium text-blue-600 hover:underline">
+                  Manage
+                </Link>
+              </div>
               <div className="space-y-2">
-                {recentJobs.map((job) => (
-                  <Card key={job.id}>
-                    <CardContent className="flex items-center justify-between p-3">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">
-                          <span className="text-slate-400">#{job.jobNumber}</span>{" "}
-                          {job.customerName || "Walk-in"}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">
-                          {job.serviceName} · {job.copies} copies
-                        </p>
-                      </div>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
-                          job.status === "completed" || job.status === "printed"
-                            ? "bg-green-50 text-green-700"
-                            : job.status === "cancelled" || job.status === "failed"
-                            ? "bg-red-50 text-red-700"
-                            : "bg-orange-50 text-orange-700"
-                        }`}
-                      >
-                        {job.status}
-                      </span>
-                    </CardContent>
-                  </Card>
+                {favorites.map((preset) => (
+                  <Link key={preset.id} href={`/editor?template=${preset.id}`}>
+                    <Card className="hover:border-slate-300 hover:bg-slate-50 transition-colors">
+                      <CardContent className="flex items-center gap-3 p-3">
+                        <div className="rounded bg-yellow-50 p-2 border border-yellow-200">
+                          <Star className="h-4 w-4 text-yellow-600 fill-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-slate-900">{preset.name}</p>
+                          <p className="text-xs text-slate-500">
+                            {preset.width}×{preset.height} {preset.unit}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
-            )}
-          </section>
+            </section>
 
-          {/* Recent Projects */}
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-500 uppercase tracking-wider">
-                {t("dashboard.recentProjects", language)}
-              </h2>
-            </div>
-            {recentProjects.length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center text-slate-500">
-                  {t("dashboard.noRecentProjects", language)}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-2">
-                {recentProjects.map((project) => (
-                  <Card key={project.id}>
-                    <CardContent className="flex items-center justify-between p-3">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{project.name}</p>
-                        <p className="text-xs text-slate-500 truncate">
-                          {project.customerName && `${project.customerName} · `}
-                          {new Date(project.updatedAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <Link href={`/editor?project=${project.id}`}>
-                        <Button variant="outline" size="sm" className="gap-1 text-xs">
-                          Open <ArrowRight className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </CardContent>
-                  </Card>
-                ))}
+            {/* 5. RECENT JOBS */}
+            <section>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                  Recent Jobs
+                </h2>
+                <Link href="/jobs" className="text-xs font-medium text-blue-600 hover:underline">
+                  View All →
+                </Link>
               </div>
-            )}
-          </section>
+              {recentJobs.length === 0 ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-slate-500">
+                    {t("jobs.noJobs", language)}
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-2">
+                  {recentJobs.map((job) => (
+                    <Card key={job.id}>
+                      <CardContent className="flex items-center justify-between p-3">
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">
+                            <span className="text-slate-400">#{job.jobNumber}</span>{" "}
+                            {job.customerName || "Walk-in"}
+                          </p>
+                          <p className="text-xs text-slate-500 truncate">
+                            {job.serviceName} · {job.copies} copies
+                          </p>
+                        </div>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                            job.status === "completed" || job.status === "printed"
+                              ? "bg-green-50 text-green-700"
+                              : job.status === "cancelled" || job.status === "failed"
+                              ? "bg-red-50 text-red-700"
+                              : "bg-orange-50 text-orange-700"
+                          }`}
+                        >
+                          {job.status}
+                        </span>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </main>
     </div>
