@@ -1,3 +1,4 @@
+export * from "./presets";
 export type Unit = "mm" | "cm" | "in";
 
 export type PaperOrientation = "portrait" | "landscape";
@@ -54,10 +55,35 @@ export interface LayoutSettings {
   copies: number | "auto";
 }
 
+export type DocumentCategory =
+  | "government_identity"
+  | "government_document"
+  | "financial"
+  | "education"
+  | "employment"
+  | "healthcare"
+  | "transport"
+  | "postal"
+  | "membership"
+  | "photo"
+  | "photo_sheet"
+  | "layout"
+  | "custom"
+  | "id-card"; // keep legacy compatibility
+
+export type SizeSource =
+  | "OFFICIAL"
+  | "ISO_STANDARD"
+  | "STANDARD_DERIVED"
+  | "COMMON_PRINT_FORMAT"
+  | "CUSTOM"
+  | "VERIFY_BEFORE_USE"
+  | "HISTORICAL";
+
 export interface Template {
   id: string;
   name: string;
-  category: TemplateCategory;
+  category: TemplateCategory | DocumentCategory;
   width: number;
   height: number;
   unit: Unit;
@@ -68,6 +94,12 @@ export interface Template {
   isBuiltIn: boolean;
   createdAt: string;
   updatedAt: string;
+  // Specifications from Master Spec
+  sizeSource?: SizeSource;
+  verificationStatus?: "verified" | "unverified" | "configurable";
+  sourceReference?: string;
+  sides?: "single" | "front-back";
+  tags?: string[];
 }
 
 export interface LayoutInput {
@@ -218,6 +250,8 @@ export interface Invoice {
   createdAt: string;
   updatedAt: string;
 }
+
+export * from "./presets";
 
 // --- Customer Management ---
 

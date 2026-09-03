@@ -22,7 +22,7 @@ import { formatDimensions } from "@/lib/utils/units";
 
 const emptyForm = {
   name: "",
-  category: "photo" as TemplateCategory,
+  category: "photo" as TemplateCategory | import("@/lib/types").DocumentCategory,
   width: 35,
   height: 45,
   unit: "mm" as Unit,

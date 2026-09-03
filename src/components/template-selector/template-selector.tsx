@@ -4,12 +4,24 @@ import { BUILT_IN_TEMPLATES } from "@/lib/templates/built-in";
 import { useEditorStore } from "@/store";
 import { cn } from "@/lib/utils/cn";
 import { formatDimensions } from "@/lib/utils/units";
-import type { Template, TemplateCategory } from "@/lib/types";
+import type { Template, DocumentCategory } from "@/lib/types";
+import { ShieldCheck, AlertCircle, Info } from "lucide-react";
 
-const categoryLabels: Record<TemplateCategory, string> = {
+export const categoryLabels: Record<string, string> = {
   photo: "Photos",
   "id-card": "ID Cards",
   layout: "Print Layouts",
+  government_identity: "Government IDs",
+  government_document: "Government Documents",
+  financial: "Financial",
+  education: "Education",
+  employment: "Employment",
+  healthcare: "Healthcare",
+  transport: "Transport",
+  postal: "Postal",
+  membership: "Membership",
+  photo_sheet: "Photo Sheets",
+  custom: "Custom",
 };
 
 interface TemplateSelectorProps {
@@ -21,17 +33,75 @@ export function TemplateSelector({ userTemplates = [] }: TemplateSelectorProps) 
   const setTemplate = useEditorStore((s) => s.setTemplate);
   const allTemplates = [...BUILT_IN_TEMPLATES, ...userTemplates];
 
-  const categories: TemplateCategory[] = ["photo", "id-card", "layout"];
+  // Group templates by category
+  const grouped = allTemplates.reduce((acc, t) => {
+    const cat = t.category;
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(t);
+    return acc;
+  }, {} as Record<string, Template[]>);
+
+  // We want to order categories roughly how they appear in the spec
+  const orderedCategories = [
+    "government_identity",
+    "government_document",
+    "photo",
+    "layout",
+    "financial",
+    "education",
+    "transport",
+    "postal",
+    "healthcare",
+    "id-card",
+    "custom",
+  ];
+
+  const presentCategories = Object.keys(grouped).sort((a, b) => {
+    let idxA = orderedCategories.indexOf(a);
+    let idxB = orderedCategories.indexOf(b);
+    if (idxA === -1) idxA = 999;
+    if (idxB === -1) idxB = 999;
+    return idxA - idxB;
+  });
+
+  const getStatusBadge = (t: Template) => {
+    if (!t.sizeSource) return null;
+    if (t.sizeSource === "OFFICIAL") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded ml-2">
+          <ShieldCheck className="h-3 w-3" /> OFFICIAL
+        </span>
+      );
+    }
+    if (t.sizeSource === "ISO_STANDARD") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded ml-2">
+          <ShieldCheck className="h-3 w-3" /> ISO
+        </span>
+      );
+    }
+    if (t.sizeSource === "VERIFY_BEFORE_USE") {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-semibold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded ml-2">
+          <AlertCircle className="h-3 w-3" /> VERIFY
+        </span>
+      );
+    }
+    return (
+      <span className="flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded ml-2">
+        <Info className="h-3 w-3" /> {t.sizeSource.replace(/_/g, " ")}
+      </span>
+    );
+  };
 
   return (
     <div className="space-y-4">
-      {categories.map((cat) => {
-        const items = allTemplates.filter((t) => t.category === cat);
-        if (items.length === 0) return null;
+      {presentCategories.map((cat) => {
+        const items = grouped[cat];
         return (
           <div key={cat}>
             <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              {categoryLabels[cat]}
+              {categoryLabels[cat] || cat}
             </h4>
             <div className="grid gap-2">
               {items.map((item) => (
@@ -46,10 +116,21 @@ export function TemplateSelector({ userTemplates = [] }: TemplateSelectorProps) 
                       : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
-                  <span className="font-medium">{item.name}</span>
-                  <span className="mt-0.5 block text-xs text-slate-500">
-                    {formatDimensions(item.width, item.height, item.unit)}
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{item.name}</span>
+                    {getStatusBadge(item)}
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
+                    <span>{formatDimensions(item.width, item.height, item.unit)}</span>
+                    {item.sides === "front-back" && (
+                      <span className="font-medium text-slate-400">Front + Back</span>
+                    )}
+                  </div>
+                  {item.verificationStatus === "configurable" && (
+                    <p className="mt-1 text-[10px] text-slate-400 italic">
+                      Verify dimensions before printing.
+                    </p>
+                  )}
                 </button>
               ))}
             </div>
@@ -70,9 +151,12 @@ export function TemplateSummary() {
 
   return (
     <div className="rounded-lg bg-slate-50 p-3 text-sm">
-      <p className="font-medium">{template.name}</p>
+      <div className="flex items-center gap-2 mb-1">
+        <p className="font-medium">{template.name}</p>
+        {template.sizeSource === "OFFICIAL" && <ShieldCheck className="h-4 w-4 text-emerald-600" />}
+      </div>
       <p className="text-slate-600">
-        Photo: {formatDimensions(template.width, template.height, template.unit)}
+        Size: {formatDimensions(template.width, template.height, template.unit)}
       </p>
       {layoutItems.length > 0 && (
         <p className="text-slate-600">
