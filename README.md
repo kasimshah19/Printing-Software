@@ -2,13 +2,17 @@
 
 Offline-first web application for cybercafés, photo studios, and print shops to quickly crop, layout, and print passport photos, visa photos, and ID cards.
 
+| 🌐 Live Demo | 💻 Source Code |
+| :---: | :---: |
+| [**printing-software.vercel.app**](https://printing-software.vercel.app) | [**kasimshah19/Printing-Software**](https://github.com/kasimshah19/Printing-Software) |
+
 ## MVP Workflow
 
 ```
 Upload → Select Template → Crop → Auto Layout → Print Preview → Print
 ```
 
-## Features (Phase 1 + 2 — Complete)
+## Features (Phases 1-3 Complete)
 
 - **Dashboard** with quick actions (Passport Photo, ID Card, A4 Sheet, Custom)
 - **Image upload** — drag & drop, file picker, clipboard paste (JPG/PNG/WEBP)
@@ -20,6 +24,10 @@ Upload → Select Template → Crop → Auto Layout → Print Preview → Print
 - **Project save/load** — layout, processed images, and source blobs in IndexedDB
 - **Custom templates** — create, edit, delete with paper size, gaps, and copy count
 - **Print preview** — per-slot images, physical mm sizing, browser print stylesheet
+- **Batch Processing** — automatically crop and adjust multiple uploaded photos at once
+- **Job Queue & Management** — track daily printing jobs (pending, processing, printed, completed)
+- **Billing & Invoicing** — generate and print invoices, track daily sales and revenue
+- **Localization (i18n)** — full UI translation support for English, Hindi, and Marathi
 
 ## Tech Stack
 
@@ -88,5 +96,4 @@ npm test
 
 ## Roadmap
 
-- **Phase 3:** Full project restore, batch processing, Hindi/Marathi UI, customer workflow
-- **Phase 4:** Optional AI modules (face detection, background removal)
+- **Phase 4:** Optional AI modules (face detection, background removal, perspective correction)
