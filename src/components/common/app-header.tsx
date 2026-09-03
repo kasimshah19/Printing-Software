@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Printer, LayoutDashboard, Settings, Layers } from "lucide-react";
+import { Printer, LayoutDashboard, Settings, Layers, Scissors } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { t } from "@/lib/i18n";
 import { useSettingsStore } from "@/store";
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/settings", icon: Settings, labelKey: "nav.settings" as const },
   { href: "/jobs", icon: Layers, labelKey: "nav.jobs" as const },
   { href: "/billing", icon: LayoutDashboard, labelKey: "nav.billing" as const },
+  { href: "/file-tools", icon: Scissors, labelKey: "nav.fileTools" as const },
 ];
 
 export function AppHeader() {

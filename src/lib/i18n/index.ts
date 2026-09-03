@@ -8,6 +8,7 @@ export type TranslationKey =
   | "nav.print"
   | "nav.jobs"
   | "nav.billing"
+  | "nav.fileTools"
   | "dashboard.quickActions"
   | "dashboard.passportPhoto"
   | "dashboard.idCard"
@@ -110,7 +111,16 @@ export type TranslationKey =
   | "billing.save"
   | "billing.todaySales"
   | "billing.totalRevenue"
-  | "billing.totalInvoices";
+  | "billing.totalInvoices"
+  | "tools.title"
+  | "tools.compressor"
+  | "tools.signature"
+  | "tools.targetSize"
+  | "tools.originalSize"
+  | "tools.compressedSize"
+  | "tools.download"
+  | "tools.calculating"
+  | "tools.success";
 
 const en: Record<TranslationKey, string> = {
   "app.title": "CyberCafe Print",
@@ -122,6 +132,7 @@ const en: Record<TranslationKey, string> = {
   "nav.print": "Print Preview",
   "nav.jobs": "Jobs",
   "nav.billing": "Billing",
+  "nav.fileTools": "File Tools",
   "dashboard.quickActions": "Quick Actions",
   "dashboard.passportPhoto": "Passport Photo",
   "dashboard.idCard": "ID Card",
@@ -225,6 +236,15 @@ const en: Record<TranslationKey, string> = {
   "billing.todaySales": "Today's Sales",
   "billing.totalRevenue": "Total Revenue",
   "billing.totalInvoices": "Total Invoices",
+  "tools.title": "File Tools",
+  "tools.compressor": "Image Compressor",
+  "tools.signature": "Signature Tool",
+  "tools.targetSize": "Target Size (KB)",
+  "tools.originalSize": "Original Size",
+  "tools.compressedSize": "Compressed Size",
+  "tools.download": "Download File",
+  "tools.calculating": "Compressing...",
+  "tools.success": "Done!",
 };
 
 const hi: Record<TranslationKey, string> = {
@@ -237,6 +257,7 @@ const hi: Record<TranslationKey, string> = {
   "nav.print": "प्रिंट प्रीव्यू",
   "nav.jobs": "जॉब्स",
   "nav.billing": "बिलिंग",
+  "nav.fileTools": "फाइल टूल्स",
   "dashboard.quickActions": "त्वरित कार्य",
   "dashboard.passportPhoto": "पासपोर्ट फोटो",
   "dashboard.idCard": "आईडी कार्ड",
@@ -340,6 +361,15 @@ const hi: Record<TranslationKey, string> = {
   "billing.todaySales": "आज की बिक्री",
   "billing.totalRevenue": "कुल आय",
   "billing.totalInvoices": "कुल बिल",
+  "tools.title": "फाइल टूल्स",
+  "tools.compressor": "इमेज कंप्रेसर",
+  "tools.signature": "सिग्नेचर टूल",
+  "tools.targetSize": "लक्ष्य आकार (KB)",
+  "tools.originalSize": "मूल आकार",
+  "tools.compressedSize": "कंप्रेस्ड आकार",
+  "tools.download": "फाइल डाउनलोड करें",
+  "tools.calculating": "कंप्रेस हो रहा है...",
+  "tools.success": "पूरा हुआ!",
 };
 
 const mr: Record<TranslationKey, string> = {
@@ -352,6 +382,7 @@ const mr: Record<TranslationKey, string> = {
   "nav.print": "प्रिंट प्रीव्ह्यू",
   "nav.jobs": "जॉब्ज",
   "nav.billing": "बिलिंग",
+  "nav.fileTools": "फाईल टूल्स",
   "dashboard.quickActions": "जलद कृती",
   "dashboard.passportPhoto": "पासपोर्ट फोटो",
   "dashboard.idCard": "आयडी कार्ड",
@@ -455,6 +486,15 @@ const mr: Record<TranslationKey, string> = {
   "billing.todaySales": "आजची विक्री",
   "billing.totalRevenue": "एकूण उत्पन्न",
   "billing.totalInvoices": "एकूण बिले",
+  "tools.title": "फाईल टूल्स",
+  "tools.compressor": "इमेज कंप्रेसर",
+  "tools.signature": "स्वाक्षरी साधन",
+  "tools.targetSize": "लक्ष्य आकार (KB)",
+  "tools.originalSize": "मूळ आकार",
+  "tools.compressedSize": "कंप्रेस्ड आकार",
+  "tools.download": "फाईल डाउनलोड करा",
+  "tools.calculating": "कंप्रेस होत आहे...",
+  "tools.success": "पूर्ण झाले!",
 };
 
 const dictionaries = { en, hi, mr };

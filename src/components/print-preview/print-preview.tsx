@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Printer, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { ArrowLeft, Printer, ZoomIn, ZoomOut, Maximize2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PrintCanvas } from "@/components/layout-editor/print-canvas";
 import { useEditorStore, getProcessedUrl } from "@/store";
@@ -11,6 +11,23 @@ import { t } from "@/lib/i18n";
 import { applyOrientation } from "@/lib/templates/paper-sizes";
 import { formatDimensions, toMillimeters } from "@/lib/utils/units";
 import { TemplateSummary } from "@/components/template-selector/template-selector";
+
+function getPreFlightWarnings(items: any[], paperWidth: number, paperHeight: number) {
+  const warnings: string[] = [];
+  if (items.length === 0) warnings.push("No items to print.");
+  
+  let overflow = false;
+  items.forEach(item => {
+    if (item.x < 0 || item.y < 0 || item.x + item.width > paperWidth || item.y + item.height > paperHeight) {
+      overflow = true;
+    }
+  });
+
+  if (overflow) warnings.push("Some images are overflowing the printable paper boundaries.");
+  if (items.length > 50) warnings.push("High number of copies. Printing might take longer to spool.");
+  
+  return warnings;
+}
 
 export function PrintPreview() {
   const language = useSettingsStore((s) => s.settings.language);
@@ -83,6 +100,37 @@ export function PrintPreview() {
             <PrintCanvas scale={scale} className="rounded-xl border border-slate-200 bg-slate-100 p-6" />
           </div>
           <div className="space-y-4">
+            
+            {/* Pre-Flight Checks */}
+            <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm">
+              <h3 className="mb-3 font-semibold uppercase tracking-wider text-slate-500">Print Pre-Flight Check</h3>
+              {(() => {
+                const pW = toMillimeters(oriented.width, oriented.unit);
+                const pH = toMillimeters(oriented.height, oriented.unit);
+                const warnings = getPreFlightWarnings(layoutItems, pW, pH);
+
+                if (warnings.length === 0) {
+                  return (
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span>Ready to print! Layout and boundaries look good.</span>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {warnings.map((warn, i) => (
+                      <div key={i} className="flex items-start gap-2 text-amber-700">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{warn}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
             <TemplateSummary />
             <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm">
               <h3 className="mb-3 font-semibold">Print Details</h3>
