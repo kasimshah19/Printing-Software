@@ -595,6 +595,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     });
 
     const items = positionsToItems(result.positions, selectedImageId);
+
+    // Smart logic for ID cards with multiple images (front/back)
+    if (template.category === "id-card") {
+      const processedIds = get().images.map(img => img.id).filter(id => get().processedImages[id]);
+      if (processedIds.length > 0) {
+        items.forEach((item, index) => {
+          // Assign images sequentially (e.g. Front, Back, Front, Back)
+          item.imageId = processedIds[index % processedIds.length];
+        });
+      }
+    }
+
     get().pushHistory();
     set({ layout: result, layoutItems: items, layoutMode: "auto", selectedLayoutItemId: null });
     return result;

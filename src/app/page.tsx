@@ -14,7 +14,8 @@ import { AppHeader } from "@/components/common/app-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useProjectStore, useSettingsStore } from "@/store";
-import { getTodayJobStats, getTodayInvoiceStats } from "@/lib/storage";
+import { getTodayJobStats, getTodayInvoiceStats, loadAllJobs } from "@/lib/storage";
+import type { PrintJob } from "@/lib/types";
 import { t } from "@/lib/i18n";
 
 const quickActions = [
@@ -56,12 +57,14 @@ export default function DashboardPage() {
 
   const [jobStats, setJobStats] = useState({ total: 0, printed: 0, pending: 0 });
   const [invoiceStats, setInvoiceStats] = useState({ totalSales: 0, invoicesCount: 0 });
+  const [recentJobs, setRecentJobs] = useState<PrintJob[]>([]);
 
   useEffect(() => {
     loadSettings();
     loadRecent();
     getTodayJobStats().then(setJobStats);
     getTodayInvoiceStats().then(setInvoiceStats);
+    loadAllJobs().then(jobs => setRecentJobs(jobs.slice(0, 5)));
   }, [loadSettings, loadRecent]);
 
   return (
@@ -170,6 +173,51 @@ export default function DashboardPage() {
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section>
+          <div className="mb-4 mt-8 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-800">
+              <Clock className="h-5 w-5" />
+              Recent Jobs
+            </h2>
+            <Link href="/jobs" className="text-sm font-medium text-blue-600 hover:underline">
+              View All
+            </Link>
+          </div>
+          {recentJobs.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center text-slate-500">
+                {t("jobs.noJobs", language)}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-3">
+              {recentJobs.map((job) => (
+                <Card key={job.id}>
+                  <CardContent className="flex items-center justify-between p-4">
+                    <div>
+                      <p className="font-medium">#{job.jobNumber} - {job.customerName || "Walk-in"}</p>
+                      <p className="text-sm text-slate-500">
+                        {job.serviceName} · {job.copies} copies
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        job.status === "completed" || job.status === "printed" 
+                          ? "bg-green-50 text-green-700" 
+                          : job.status === "cancelled" 
+                            ? "bg-red-50 text-red-700" 
+                            : "bg-orange-50 text-orange-700"
+                      }`}
+                    >
+                      {t(`jobs.${job.status}` as any, language)}
+                    </span>
                   </CardContent>
                 </Card>
               ))}
