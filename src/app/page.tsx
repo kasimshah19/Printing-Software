@@ -33,7 +33,7 @@ import { t } from "@/lib/i18n";
 import { BUILT_IN_TEMPLATES } from "@/lib/templates/built-in";
 
 const quickActions = [
-  { id: "passport", label: "Passport Photo", icon: Camera, href: "/editor?template=passport-photo", color: "bg-blue-50 text-blue-700 border-blue-200" },
+  { id: "passport", label: "Passport Photo", icon: Camera, href: "/photo-studio", color: "bg-blue-50 text-blue-700 border-blue-200" },
   { id: "id-card", label: "Generic ID Card", icon: CreditCard, href: "/editor?template=generic-id", color: "bg-sky-50 text-sky-700 border-sky-200" },
   { id: "aadhaar", label: "Aadhaar PVC", icon: CreditCard, href: "/editor?template=aadhaar-pvc", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   { id: "pan", label: "PAN Card", icon: CreditCard, href: "/editor?template=pan-card", color: "bg-teal-50 text-teal-700 border-teal-200" },

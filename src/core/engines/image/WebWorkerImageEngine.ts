@@ -132,13 +132,8 @@ export class WebWorkerImageEngine implements ImageProcessingEngine {
             // Placeholder: Assume IDBAssetRepository is handling Blobs via IDB
             // Currently, JobAsset only holds metadata, so we need to hit AssetStoragePort to fetch it
             try {
-                const repo = new IDBAssetRepository(); // just for fake local resolving demo
-                const meta = await repo.get(asset.id);
-                if (!meta) throw new Error("Asset missing");
-
-                // In production, we'd hit IDB Asset Storage directly here to reconstruct the File object 
                 // We will mock blob resolution temporarily until AssetStorage is wired fully
-                const blob = new Blob([]);
+                const blob = options.blob || new Blob([]);
 
                 this.getWorker().postMessage({ id, action, blob, options });
             } catch (e) {
