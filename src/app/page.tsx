@@ -34,11 +34,11 @@ import { BUILT_IN_TEMPLATES } from "@/lib/templates/built-in";
 
 const quickActions = [
   { id: "passport", label: "Passport Photo", icon: Camera, href: "/photo-studio", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  { id: "id-card", label: "Generic ID Card", icon: CreditCard, href: "/editor?template=generic-id", color: "bg-sky-50 text-sky-700 border-sky-200" },
-  { id: "aadhaar", label: "Aadhaar PVC", icon: CreditCard, href: "/editor?template=aadhaar-pvc", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  { id: "pan", label: "PAN Card", icon: CreditCard, href: "/editor?template=pan-card", color: "bg-teal-50 text-teal-700 border-teal-200" },
-  { id: "dl", label: "Driving Licence", icon: CreditCard, href: "/editor?template=driving-licence", color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
-  { id: "voter", label: "Voter ID", icon: CreditCard, href: "/editor?template=voter-epic-new", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  { id: "id-card", label: "Generic ID Card", icon: CreditCard, href: "/id-card-studio?template=generic", color: "bg-sky-50 text-sky-700 border-sky-200" },
+  { id: "aadhaar", label: "Aadhaar PVC", icon: CreditCard, href: "/id-card-studio?template=aadhaar", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { id: "pan", label: "PAN Card", icon: CreditCard, href: "/id-card-studio?template=pan", color: "bg-teal-50 text-teal-700 border-teal-200" },
+  { id: "dl", label: "Driving Licence", icon: CreditCard, href: "/id-card-studio?template=dl", color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+  { id: "voter", label: "Voter ID", icon: CreditCard, href: "/id-card-studio?template=voter", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   { id: "document", label: "A4 Document", icon: FileText, href: "/editor?template=aadhaar-letter", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   { id: "pdf", label: "PDF Tools", icon: FileUp, href: "/file-tools", color: "bg-pink-50 text-pink-700 border-pink-200" },
   { id: "signature", label: "Signature", icon: FileSignature, href: "/file-tools", color: "bg-amber-50 text-amber-700 border-amber-200" },
