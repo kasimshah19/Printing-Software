@@ -53,9 +53,14 @@ export default function ConnectivityCenterPage() {
                const assets = await LocalQRTransferAdapter.retrieveAssets(qrState.id);
                alert(`Successfully pulled ${assets.length} items from phone into Job Pipeline!`);
                setModal("none");
+           } else if (status === "error") {
+               setQrStatus("error" as any);
+               setModal("none");
+               console.warn("QR Session lost or expired");
            }
        } catch (e) {
            console.error("Polling error", e);
+           setModal("none");
        }
     }, 2000);
 

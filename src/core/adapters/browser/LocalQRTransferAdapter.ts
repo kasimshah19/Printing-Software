@@ -31,6 +31,9 @@ export class LocalQRTransferAdapter {
 
     static async pollStatus(sessionId: string): Promise<{ status: QRTransferStatus; count: number }> {
         const res = await fetch(`/api/qr/status/${sessionId}`);
+        if (res.status === 404) {
+            return { status: "error", count: 0 };
+        }
         if (!res.ok) throw new Error("Failed to poll status");
         const json = await res.json();
         return {
