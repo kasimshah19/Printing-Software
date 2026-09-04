@@ -13,8 +13,12 @@ export default function ConnectivityCenterPage() {
   
   // QR State
   const [qrState, setQrState] = useState<{ id: string, joinUrl: string, token: string } | null>(null);
-  const [qrStatus, setQrStatus] = useState<"waiting" | "connected" | "completed">("waiting");
+  const [qrStatus, setQrStatus] = useState<"waiting" | "connected" | "completed" | "error">("waiting");
   const [qrPollCount, setQrPollCount] = useState(0);
+
+  // Vercel stateless detection flag for Capability UI
+  const isVercel = process.env.NEXT_PUBLIC_VERCEL_ENV !== undefined || 
+                   (typeof window !== "undefined" && window.location.hostname.includes("vercel.app"));
 
   // Hot Folder State
   const [folderCount, setFolderCount] = useState(0);
@@ -25,6 +29,10 @@ export default function ConnectivityCenterPage() {
   }, []);
 
   const openQRModal = async () => {
+    if (isVercel) {
+       alert("QR Upload requires local PC memory. Serverless deployments (Vercel) are stateless.\nPlease run locally via 'npm run dev' to use this feature, or configure Redis/KV.");
+       return;
+    }
     setModal("qr");
     try {
       const session = await LocalQRTransferAdapter.createSession();
@@ -107,10 +115,10 @@ export default function ConnectivityCenterPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
           <ConnectivityCard
             title="Phone QR"
-            icon={<Smartphone className="h-5 w-5 text-blue-600" />}
-            status="available"
-            statusLabel="Ready"
-            description="Receive photos from phone via local QR scan."
+            icon={<Smartphone className={isVercel ? "h-5 w-5 text-red-600" : "h-5 w-5 text-blue-600"} />}
+            status={isVercel ? "error" : "available"}
+            statusLabel={isVercel ? "Local PC Required" : "Ready"}
+            description={isVercel ? "Vercel deployments are stateless. QR sync requires a local Intranet running 'npm run dev' or a Redis instance." : "Receive photos from phone via local QR scan."}
             actionLabel="Generate QR"
             onAction={openQRModal}
           />
