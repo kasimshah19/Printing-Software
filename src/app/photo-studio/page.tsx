@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { AppHeader } from "@/components/common/app-header";
 import { Upload, Crop, Maximize, RotateCw, Save, Check } from "lucide-react";
 import { WebWorkerImageEngine } from "@/core/engines/image/WebWorkerImageEngine";
+import { BrowserPhotoEngine } from "@/core/engines/photo/BrowserPhotoEngine";
 import type { JobAsset } from "@/core/domain/JobAsset";
 import { LocalFileAssetSource } from "@/core/adapters/browser/LocalFileAssetSource";
 import { ImportManager } from "@/core/application/ImportManager";
@@ -14,11 +15,13 @@ export default function PhotoStudioPage() {
     const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
     const [isProcessing, setIsProcessing] = useState(false);
     
-    // We instantiate the engine locally for the UI session
-    const engineRef = useRef<WebWorkerImageEngine | null>(null);
+    // Engines
+    const imageEngineRef = useRef<WebWorkerImageEngine | null>(null);
+    const photoEngineRef = useRef<BrowserPhotoEngine | null>(null);
 
     useEffect(() => {
-        engineRef.current = new WebWorkerImageEngine();
+        imageEngineRef.current = new WebWorkerImageEngine();
+        photoEngineRef.current = new BrowserPhotoEngine();
         return () => {
              // Cleanup ObjectURLs to prevent memory leaks
              Object.values(previewUrls).forEach(URL.revokeObjectURL);
@@ -56,29 +59,21 @@ export default function PhotoStudioPage() {
     };
 
     const handleAction = async (action: "rotate" | "crop-passport") => {
-        if (!selectedAssetId || !engineRef.current || !previewUrls[selectedAssetId]) return;
+        if (!selectedAssetId || !imageEngineRef.current || !photoEngineRef.current || !previewUrls[selectedAssetId]) return;
         setIsProcessing(true);
 
         try {
-            // Reconstruct a temporary JobAsset + Blob binding for engine request
-            // since we don't have the fully wired IDB repository in this UI test slice yet
             const blobResp = await fetch(previewUrls[selectedAssetId]);
             const blob = await blobResp.blob();
-            
             const assetToProcess = assets.find(a => a.id === selectedAssetId)!;
-            
-            // Hack injected to mock IDB get(): 
-            // the WebWorkerImageEngine expects IDB, but let's just pass the blob in a mock if needed,
-            // Actually, my WebWorkerImageEngine is tightly coupled to IDBAssetRepository inside it.
-            // Let's modify WebWorkerImageEngine to accept blobs directly if provided in options for UI demos.
             
             let processed;
             if (action === "rotate") {
-                processed = await engineRef.current.rotate(assetToProcess, 90); 
-                // Note: We bypass strict IDB by directly injecting blob into engine options in Local testing mode!
-                processed = await (engineRef.current as any).execute("rotate", assetToProcess, { degrees: 90, blob });
+                // Background Non-blocking generic rotation
+                processed = await (imageEngineRef.current as any).execute("rotate", assetToProcess, { degrees: 90, blob });
             } else if (action === "crop-passport") {
-                processed = await (engineRef.current as any).execute("resize", assetToProcess, { width: 350, height: 450, fit: "cover", blob });
+                // Auto face detection & smart crop (35x45mm indian passport std)
+                processed = await photoEngineRef.current.autoCrop(assetToProcess, 35, 45, blob);
             }
 
             if (processed) {
