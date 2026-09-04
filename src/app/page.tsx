@@ -39,10 +39,10 @@ const quickActions = [
   { id: "pan", label: "PAN Card", icon: CreditCard, href: "/id-card-studio?template=pan", color: "bg-teal-50 text-teal-700 border-teal-200" },
   { id: "dl", label: "Driving Licence", icon: CreditCard, href: "/id-card-studio?template=dl", color: "bg-cyan-50 text-cyan-700 border-cyan-200" },
   { id: "voter", label: "Voter ID", icon: CreditCard, href: "/id-card-studio?template=voter", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { id: "document", label: "A4 Document", icon: FileText, href: "/editor?template=aadhaar-letter", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-  { id: "pdf", label: "PDF Tools", icon: FileUp, href: "/file-tools", color: "bg-pink-50 text-pink-700 border-pink-200" },
-  { id: "signature", label: "Signature", icon: FileSignature, href: "/file-tools", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  { id: "compress", label: "Compress", icon: Scissors, href: "/file-tools", color: "bg-rose-50 text-rose-700 border-rose-200" },
+  { id: "document", label: "A4 Document", icon: FileText, href: "/document-studio", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  { id: "pdf", label: "PDF Tools", icon: FileUp, href: "/document-studio", color: "bg-pink-50 text-pink-700 border-pink-200" },
+  { id: "signature", label: "Signature", icon: FileSignature, href: "/document-studio", color: "bg-amber-50 text-amber-700 border-amber-200" },
+  { id: "compress", label: "Compress", icon: Scissors, href: "/document-studio", color: "bg-rose-50 text-rose-700 border-rose-200" },
   { id: "custom", label: "Custom Print", icon: Printer, href: "/editor", color: "bg-orange-50 text-orange-700 border-orange-200" },
 ];
 
